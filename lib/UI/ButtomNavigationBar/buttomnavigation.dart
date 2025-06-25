@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:simple/Reusable/color.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
+import 'package:simple/Reusable/text_styles.dart';
 import 'package:simple/UI/Home_screen/home_screen.dart';
 import 'package:simple/UI/Contact/contact_screen.dart';
 import 'package:simple/UI/Login/login.dart';
+import 'package:simple/Reusable/color.dart';
+import 'package:simple/Reusable/text_styles.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -18,7 +21,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   final List<Widget> _pages = const [
     HomeScreen(),
-    LoginPage(), // Replace with actual ProfileScreen() if needed
+    LoginPage(),
     ContactScreen(),
   ];
 
@@ -33,19 +36,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
           final shouldExit = await showDialog<bool>(
             context: context,
             builder: (context) => AlertDialog(
-              title: const Text("Exit App"),
+              title:  Text("Exit App",
+                style: MyTextStyle.f14(appPrimaryColor),),
               content: const Text("Are you sure you want to exit?"),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context, false),
-                  child: const Text("No"),
+                  child:  Text("No",
+                  style: MyTextStyle.f12(appPrimaryColor),),
                 ),
                 TextButton(
                   onPressed: () {
                     Navigator.pop(context, true);
                     SystemNavigator.pop();
                   },
-                  child: const Text("Yes"),
+                  child:  Text("Yes",
+                    style: MyTextStyle.f12(appPrimaryColor),),
                 ),
               ],
             ),
@@ -89,9 +95,9 @@ class CustomBottomNavigationBar extends StatelessWidget {
       animationCurve: Curves.easeInOut,
       onTap: onTap,
       items: const [
-        Icon(Icons.home, color: Colors.white, size: 30),
-        Icon(Icons.account_circle, color: Colors.white, size: 30),
-        Icon(Icons.contact_phone, color: Colors.white, size: 30),
+        Icon(Icons.home, color: whiteColor, size: 30),
+        Icon(Icons.account_circle, color: whiteColor, size: 30),
+        Icon(Icons.contact_phone, color: whiteColor, size: 30),
       ],
     );
   }

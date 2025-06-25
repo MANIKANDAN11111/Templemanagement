@@ -18,6 +18,9 @@ const blueColor = Colors.blue;
 const whiteColor = Colors.white;
 const redColor = Colors.red;
 const greyColor = Colors.grey;
+final greyColor200 = Colors.grey.shade200;
+const greyColor50 = Color(0xff147338);
+const greyColor800=Color(0xFF424242);
 const greenColor = Colors.green;
 const yellowColor = Colors.yellow;
 

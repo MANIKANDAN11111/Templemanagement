@@ -64,9 +64,10 @@ class _DonationPageViewState extends State<DonationPageView> {
           height: 300,
           child: Column(
             children: [
-              const Padding(
+               Padding(
                 padding: EdgeInsets.all(16),
-                child: Text("Select Donation", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                child: Text("Select Donation",
+                    style:MyTextStyle.f18(appPrimaryColor,weight: FontWeight.bold,),),
               ),
               Expanded(
                 child: ListView.builder(
@@ -77,7 +78,7 @@ class _DonationPageViewState extends State<DonationPageView> {
                       leading: Image.asset(item['image']!, width: 40, height: 40),
                       title: Text(item['title']!),
                       trailing: item['title'] == selectedDonation
-                          ? const Icon(Icons.check_circle, color: Colors.green)
+                          ? const Icon(Icons.check_circle, color: greenColor)
                           : null,
                       onTap: () {
                         setState(() {
@@ -115,7 +116,7 @@ class _DonationPageViewState extends State<DonationPageView> {
         backgroundColor: appPrimaryColor,
         leading: IconButton(
           onPressed: () => Navigator.pop(context),
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: whiteColor),
         ),
       ),
       body: SingleChildScrollView(
@@ -126,7 +127,6 @@ class _DonationPageViewState extends State<DonationPageView> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              /// Select Donation Card
               Card(
                 elevation: 4,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -178,8 +178,6 @@ class _DonationPageViewState extends State<DonationPageView> {
               ),
 
               const SizedBox(height: 30),
-
-              /// Devotee Details Card
               Card(
                 elevation: 4,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),

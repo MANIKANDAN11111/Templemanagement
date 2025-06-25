@@ -1,26 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:simple/Bloc/demo/demo_bloc.dart';
 import 'package:simple/Reusable/color.dart';
 import 'package:simple/Reusable/text_styles.dart';
 import 'package:simple/UI/Archanai_screen/add_rasi_bottomsheet.dart';
-
-class ArchanaItem {
-  final String title;
-  final String tamilTitle;
-  final String imagePath;
-  final double price;
-  int quantity;
-  bool isSelected;
-
-  ArchanaItem(this.title, this.tamilTitle, this.imagePath, this.price,
-      {this.quantity = 0, this.isSelected = false});
-}
+import 'package:simple/UI/Archanai_screen/archanaitem.dart';
 
 class ArchanaiScreen extends StatelessWidget {
   const ArchanaiScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const ArchanaiScreenView();
+    return BlocProvider(
+      create: (_) => DemoBloc(),
+      child: const ArchanaiScreenView(),
+    );
   }
 }
 
@@ -109,12 +103,22 @@ class _ArchanaiScreenViewState extends State<ArchanaiScreenView>
 
   @override
   Widget build(BuildContext context) {
+    return BlocBuilder<DemoBloc, dynamic>(
+      buildWhen: (previous, current) => false,
+      builder: (context, state) {
+        return mainContainer();
+      },
+    );
+  }
+
+  Widget mainContainer() {
     return SafeArea(
       child: Scaffold(
         backgroundColor: whiteColor,
         appBar: AppBar(
           backgroundColor: appPrimaryColor,
-          title: Text("Archanai", style: MyTextStyle.f20(whiteColor, weight: FontWeight.bold)),
+          title: Text("Archanai",
+              style: MyTextStyle.f20(whiteColor, weight: FontWeight.bold)),
           centerTitle: true,
           bottom: TabBar(
             controller: _tabController,
@@ -125,7 +129,11 @@ class _ArchanaiScreenViewState extends State<ArchanaiScreenView>
               Tab(text: "Cart"),
             ],
           ),
-          leading: IconButton(onPressed: () { Navigator.pop(context); }, icon: Icon(Icons.arrow_back), color: whiteColor),
+          leading: IconButton(
+            onPressed: () => Navigator.pop(context),
+            icon: Icon(Icons.arrow_back),
+            color: whiteColor,
+          ),
         ),
         body: TabBarView(
           controller: _tabController,
@@ -145,17 +153,16 @@ class _ArchanaiScreenViewState extends State<ArchanaiScreenView>
           padding: const EdgeInsets.all(12.0),
           child: Row(
             children: [
-               Text("Filter:", style: MyTextStyle.f16(
-                appPrimaryColor,
-                weight: FontWeight.bold,
-              ),),
+              Text("Filter:",
+                  style: MyTextStyle.f16(appPrimaryColor, weight: FontWeight.bold)),
               const SizedBox(width: 10),
               Expanded(
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   decoration: BoxDecoration(
-                    color: Colors.grey.shade200,
+                    color: Colors.white, // Changed to white
                     borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.grey.shade300),
                   ),
                   child: DropdownButtonHideUnderline(
                     child: DropdownButton<String>(
@@ -163,15 +170,14 @@ class _ArchanaiScreenViewState extends State<ArchanaiScreenView>
                       isExpanded: true,
                       dropdownColor: Colors.white,
                       iconEnabledColor: appPrimaryColor,
-                      style: MyTextStyle.f14(appPrimaryColor, weight: FontWeight.bold),
+                      style: MyTextStyle.f14(appPrimaryColor,
+                          weight: FontWeight.bold),
                       items: filterOptions.map((filter) {
                         return DropdownMenuItem<String>(
                           value: filter,
                           child: Text(filter,
-                          style: MyTextStyle.f16(
-                            appPrimaryColor,
-                            weight: FontWeight.bold,
-                          ),),
+                              style: MyTextStyle.f16(appPrimaryColor,
+                                  weight: FontWeight.bold)),
                         );
                       }).toList(),
                       onChanged: (value) {
@@ -190,15 +196,18 @@ class _ArchanaiScreenViewState extends State<ArchanaiScreenView>
           child: ListView(
             padding: const EdgeInsets.symmetric(horizontal: 12),
             children: [
-              if (selectedFilter == 'All Archanai' || selectedFilter == 'Archanai') ...[
+              if (selectedFilter == 'All Archanai' ||
+                  selectedFilter == 'Archanai') ...[
                 _buildSectionTitle("Archanai"),
                 _buildGridSection(generalArchanai),
               ],
-              if (selectedFilter == 'All Archanai' || selectedFilter == 'Vaganam Archanai') ...[
+              if (selectedFilter == 'All Archanai' ||
+                  selectedFilter == 'Vaganam Archanai') ...[
                 _buildSectionTitle("Vaganam Archanai"),
                 _buildGridSection(vaganamArchanai),
               ],
-              if (selectedFilter == 'All Archanai' || selectedFilter == 'Lamp') ...[
+              if (selectedFilter == 'All Archanai' ||
+                  selectedFilter == 'Lamp') ...[
                 _buildSectionTitle("Lamp"),
                 _buildGridSection(lampArchanai),
               ],
@@ -211,11 +220,11 @@ class _ArchanaiScreenViewState extends State<ArchanaiScreenView>
     );
   }
 
-
   Widget _buildSectionTitle(String title) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 6, top: 14),
-      child: Text(title, style: MyTextStyle.f16(appPrimaryColor, weight: FontWeight.bold)),
+      child:
+      Text(title, style: MyTextStyle.f16(appPrimaryColor, weight: FontWeight.bold)),
     );
   }
 
@@ -233,46 +242,53 @@ class _ArchanaiScreenViewState extends State<ArchanaiScreenView>
       itemBuilder: (context, index) {
         final item = items[index];
         return GestureDetector(
-          onTap: () {
-            setState(() {
-              item.quantity++;
-              item.isSelected = true;
-            });
-          },
+          onTap: () => increaseQuantity(item),
           child: Card(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            elevation: 2,
+            color: Colors.white, // Added white background
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+              side: BorderSide(color: Colors.grey.shade300, width: 1),
+            ),
+            elevation: 0, // Removed shadow
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 ClipRRect(
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-                  child: Image.asset(item.imagePath, height: 100, fit: BoxFit.cover),
+                  borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(12)),
+                  child: Image.asset(item.imagePath,
+                      height: 100, fit: BoxFit.cover),
                 ),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Column(
                     children: [
-                      Text(item.title, textAlign: TextAlign.center, style: MyTextStyle.f14(blackColor, weight: FontWeight.bold)),
-                      Text(item.tamilTitle, style: MyTextStyle.f10(greyColor)),
+                      Text(item.title,
+                          textAlign: TextAlign.center,
+                          style: MyTextStyle.f14(Colors.black87, weight: FontWeight.bold)),
+                      Text(item.tamilTitle, style: MyTextStyle.f10(Colors.grey)),
                       const SizedBox(height: 2),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text("₹${item.price}", style: MyTextStyle.f12(blackColor, weight: FontWeight.bold)),
+                          Text("₹${item.price}",
+                              style: MyTextStyle.f12(Colors.black87,
+                                  weight: FontWeight.bold)),
                           if (item.quantity > 0)
                             const Padding(
                               padding: EdgeInsets.only(left: 4),
-                              child: Icon(Icons.check_circle, color: Colors.green, size: 16),
+                              child: Icon(Icons.check_circle,
+                                  color: Colors.green, size: 16),
                             ),
                         ],
                       ),
                       const SizedBox(height: 4),
                       if (item.quantity > 0)
-                        Text(
-                          '${item.quantity} Selected',
-                          style: const TextStyle(fontSize: 12, color: Colors.green, fontWeight: FontWeight.bold),
-                        ),
+                        Text('${item.quantity} Selected',
+                            style: const TextStyle(
+                                fontSize: 12,
+                                color: Colors.green,
+                                fontWeight: FontWeight.bold)),
                     ],
                   ),
                 ),
@@ -293,7 +309,12 @@ class _ArchanaiScreenViewState extends State<ArchanaiScreenView>
             children: [
               Expanded(
                 child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(backgroundColor: appPrimaryColor),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: appPrimaryColor,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
                   onPressed: () {
                     showModalBottomSheet(
                       context: context,
@@ -302,21 +323,32 @@ class _ArchanaiScreenViewState extends State<ArchanaiScreenView>
                       builder: (_) => const AddRasiDialog(),
                     );
                   },
-                  child: Text("Add Raasi", style: MyTextStyle.f14(whiteColor, weight: FontWeight.bold)),
+                  child: Text("Add Raasi",
+                      style: MyTextStyle.f14(Colors.white, weight: FontWeight.bold)),
                 ),
               ),
               const SizedBox(width: 10),
               ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: appPrimaryColor),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    side: BorderSide(color: appPrimaryColor),
+                  ),
+                ),
                 onPressed: clearCart,
-                child: Text("Clear All", style: MyTextStyle.f14(whiteColor, weight: FontWeight.bold)),
+                child: Text("Clear All",
+                    style: MyTextStyle.f14(appPrimaryColor, weight: FontWeight.bold)),
               )
             ],
           ),
         ),
         Expanded(
           child: cartItems.isEmpty
-              ? const Center(child: Text("No items in cart"))
+              ? Center(
+            child: Text("No items in cart",
+                style: MyTextStyle.f16(Colors.grey)),
+          )
               : GridView.builder(
               padding: const EdgeInsets.all(12),
               itemCount: cartItems.length,
@@ -329,8 +361,11 @@ class _ArchanaiScreenViewState extends State<ArchanaiScreenView>
               itemBuilder: (context, index) {
                 final item = cartItems[index];
                 return Card(
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  elevation: 2,
+                  color: Colors.white,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      side: BorderSide(color: Colors.grey.shade300)),
+                  elevation: 0,
                   child: Padding(
                     padding: const EdgeInsets.all(8),
                     child: Column(
@@ -338,13 +373,16 @@ class _ArchanaiScreenViewState extends State<ArchanaiScreenView>
                         ClipRRect(
                           borderRadius: BorderRadius.circular(8),
                           child: Image.asset(item.imagePath,
-                              height: 100, width: double.infinity, fit: BoxFit.cover),
+                              height: 100,
+                              width: double.infinity,
+                              fit: BoxFit.cover),
                         ),
                         const SizedBox(height: 6),
                         Text(item.title,
                             textAlign: TextAlign.center,
-                            style: MyTextStyle.f14(blackColor, weight: FontWeight.bold)),
-                        Text(item.tamilTitle, style: MyTextStyle.f10(greyColor)),
+                            style: MyTextStyle.f14(Colors.black87,
+                                weight: FontWeight.bold)),
+                        Text(item.tamilTitle, style: MyTextStyle.f10(Colors.grey)),
                         const Spacer(),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -373,7 +411,7 @@ class _ArchanaiScreenViewState extends State<ArchanaiScreenView>
                     style: MyTextStyle.f14(appPrimaryColor, weight: FontWeight.bold)),
               ),
               _bottomTotalBar("Pay Now", () {
-                // Payment logic
+                // Add payment logic here
               }),
             ],
           )
@@ -418,7 +456,8 @@ class _ArchanaiScreenViewState extends State<ArchanaiScreenView>
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text("Detailed Bill", style: MyTextStyle.f16(appPrimaryColor, weight: FontWeight.bold)),
+        title: Text("Detailed Bill",
+            style: MyTextStyle.f16(appPrimaryColor, weight: FontWeight.bold)),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -436,7 +475,8 @@ class _ArchanaiScreenViewState extends State<ArchanaiScreenView>
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text("Close", style: MyTextStyle.f14(appPrimaryColor, weight: FontWeight.bold)),
+            child: Text("Close",
+                style: MyTextStyle.f14(appPrimaryColor, weight: FontWeight.bold)),
           ),
         ],
       ),

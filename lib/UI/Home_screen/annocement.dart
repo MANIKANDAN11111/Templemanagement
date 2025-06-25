@@ -89,7 +89,8 @@ class _AnnouncementViewState extends State<AnnouncementView> {
     super.dispose();
   }
 
-  Widget mainContainer() {
+  Widget mainContainer()
+  {
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -115,7 +116,7 @@ class _AnnouncementViewState extends State<AnnouncementView> {
   Widget build(BuildContext context) {
     return BlocBuilder<DemoBloc, dynamic>(
       buildWhen: (previous, current) => false,
-      builder: (context, state) {
+      builder: (context, state)  {
         return mainContainer();
       },
     );

@@ -1,4 +1,4 @@
-package com.example.simple
+package com.sentinix.templemanagement
 
 import io.flutter.embedding.android.FlutterActivity
 

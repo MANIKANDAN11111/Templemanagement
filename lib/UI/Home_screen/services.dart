@@ -5,10 +5,11 @@ import 'package:simple/Reusable/color.dart';
 import 'package:simple/Reusable/text_styles.dart';
 import 'package:simple/UI/Archanai_screen/archanai.dart';
 import 'package:simple/UI/Donation/donation_page.dart';
+import 'package:simple/UI/Hall/hallcalender_screen.dart';
 import 'package:simple/UI/LiveStream/live.dart';
 import 'package:simple/UI/Prasadam_screen/prasadam.dart';
+import 'package:simple/UI/Ubayam/ubayamcalender_screen.dart';
 import 'package:simple/Bloc/demo/demo_bloc.dart';
-
 
 class ServicesSection extends StatelessWidget {
   const ServicesSection({super.key});
@@ -56,11 +57,11 @@ class _ServicesSectionViewState extends State<ServicesSectionView> {
       'subtitle': 'மண்டபம்',
       'icon': 'assets/image/book.png',
     },
-    {
-      'title': 'Virtual Ubayam',
-      'subtitle': 'மெய்நிகர் உபயம்',
-      'icon': 'assets/image/ubayam.png',
-    },
+    // {
+    //   'title': 'Virtual Ubayam',
+    //   'subtitle': 'மெய்நிகர் உபயம்',
+    //   'icon': 'assets/image/ubayam.png',
+    // },
     {
       'title': 'Live Streaming',
       'subtitle': '',
@@ -101,28 +102,40 @@ class _ServicesSectionViewState extends State<ServicesSectionView> {
                     if (service['title'] == 'Donation') {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const DonationPage()),
+                        MaterialPageRoute(builder: (
+                            context) => const DonationPage()),
                       );
                     } else if (service['title'] == 'Prasadam Booking') {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => PrasadamScreen()),
+                        MaterialPageRoute(builder: (context) =>
+                            PrasadamScreen()),
                       );
                     } else if (service['title'] == 'Archanai/Vilaku') {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => ArchanaiScreen()),
+                        MaterialPageRoute(builder: (context) =>
+                            ArchanaiScreen()),
                       );
                     }
                     else if (service['title'] == 'Live Streaming') {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => LiveStreamPage(isDarkMode: false,)),
+                        MaterialPageRoute(builder: (context) =>
+                            LiveStreamPage(isDarkMode: false,)),
                       );
                     }
-                    // Add more if needed
+                    else if(service['title']=='Ubayam')
+                    {
+                      Navigator.push(context,MaterialPageRoute(builder: (context)=>UbayamCalendarScreen()));
+                    }
+                    else if(service['title']=='Hall')
+                    {
+                      Navigator.push(context,MaterialPageRoute(builder: (context)=>HallCalendarScreen()));
+                    }
                   },
                   child: Card(
+                    color: Colors.white, // Add this line to make the card white
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),

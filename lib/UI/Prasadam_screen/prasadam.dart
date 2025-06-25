@@ -162,8 +162,12 @@ class _PrasadamViewState extends State<PrasadamView> with TickerProviderStateMix
     return GestureDetector(
       onTap: onTap,
       child: Card(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        elevation: 2,
+        color: Colors.white, // Explicit white color
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(color: greyColor200), // Light grey border
+        ),
+        elevation: 0, // Remove shadow
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -175,13 +179,16 @@ class _PrasadamViewState extends State<PrasadamView> with TickerProviderStateMix
               padding: const EdgeInsets.all(8.0),
               child: Column(
                 children: [
-                  Text(item.title, textAlign: TextAlign.center, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
-                  Text(item.tamilTitle, style: const TextStyle(fontSize: 14, color: Colors.grey)),
+                  Text(item.title, textAlign: TextAlign.center,
+                      style: MyTextStyle.f15(blackColor,weight: FontWeight.bold)),
+                  Text(item.tamilTitle,
+                      style: MyTextStyle.f12(greyColor),),
                   const SizedBox(height: 2),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text("₹${item.price}", style: const TextStyle(fontWeight: FontWeight.bold)),
+                      Text("₹${item.price}",
+                          style: MyTextStyle.f14(appPrimaryColor,weight: FontWeight.bold),),
                       if (item.quantity > 0)
                         const Padding(
                           padding: EdgeInsets.only(left: 4),
@@ -192,8 +199,7 @@ class _PrasadamViewState extends State<PrasadamView> with TickerProviderStateMix
                   const SizedBox(height: 4),
                   if (item.quantity > 0)
                     Text(
-                      '${item.quantity} Selected',
-                      style: const TextStyle(fontSize: 12, color: Colors.green, fontWeight: FontWeight.bold),
+                      '${item.quantity} Selected', style:MyTextStyle.f12(greenColor,weight: FontWeight.bold,)
                     ),
                 ],
               ),
@@ -206,8 +212,12 @@ class _PrasadamViewState extends State<PrasadamView> with TickerProviderStateMix
 
   Widget _cartItemCard(PrasadamItem item) {
     return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      elevation: 2,
+      color: Colors.white, // Explicit white color
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: greyColor200), // Light grey border
+      ),
+      elevation: 0, // Remove shadow
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Column(
@@ -217,8 +227,8 @@ class _PrasadamViewState extends State<PrasadamView> with TickerProviderStateMix
               child: Image.asset(item.imageUrl, height: 80, width: double.infinity, fit: BoxFit.cover),
             ),
             const SizedBox(height: 6),
-            Text(item.title, textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.bold)),
-            Text(item.tamilTitle, textAlign: TextAlign.center, style: const TextStyle(fontSize: 12)),
+            Text(item.title, textAlign: TextAlign.center, style: MyTextStyle.f14(blackColor,weight: FontWeight.bold)),
+            Text(item.tamilTitle, textAlign: TextAlign.center, style: MyTextStyle.f12(greyColor)),
             const Spacer(),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -254,7 +264,7 @@ class _PrasadamViewState extends State<PrasadamView> with TickerProviderStateMix
   Widget _bottomTotalSection(BuildContext context, {required String label, required VoidCallback onPressed}) {
     return Container(
       padding: const EdgeInsets.all(16),
-      color: Colors.grey.shade200,
+      color: greyColor200,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [

@@ -1,31 +1,45 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:simple/Bloc/demo/demo_bloc.dart';
 import 'package:simple/Reusable/color.dart';
 import 'package:simple/Reusable/text_styles.dart';
 
-class AddRasiDialog extends StatefulWidget {
+class AddRasiDialog extends StatelessWidget {
   const AddRasiDialog({super.key});
 
   @override
-  State<AddRasiDialog> createState() => _AddRasiDialogState();
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) => DemoBloc(),
+      child: const AddRasiDialogView(),
+    );
+  }
 }
 
-class _AddRasiDialogState extends State<AddRasiDialog> {
+class AddRasiDialogView extends StatefulWidget {
+  const AddRasiDialogView({super.key});
+
+  @override
+  State<AddRasiDialogView> createState() => _AddRasiDialogViewState();
+}
+
+class _AddRasiDialogViewState extends State<AddRasiDialogView> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController nameController = TextEditingController();
 
   final Map<String, List<String>> rasiToNatchathra = {
-    'Mesham': ['Ashwini', 'Bharani', 'Krittika'],
-    'Rishabam': ['Krittika', 'Rohini', 'Mrigashira'],
-    'Mithunam': ['Mrigashira', 'Ardra', 'Punarvasu'],
-    'Kadagam': ['Punarvasu', 'Pushya', 'Ashlesha'],
-    'Simmem': ['Magha', 'Purva Phalguni', 'Uttara Phalguni'],
-    'Kanni': ['Uttara Phalguni', 'Hasta', 'Chitra'],
-    'Thulam': ['Chitra', 'Swati', 'Vishakha'],
-    'Viruchigam': ['Vishakha', 'Anuradha', 'Jyeshtha'],
-    'Thanusu': ['Mula', 'Purva Ashadha', 'Uttara Ashadha'],
-    'Makaram': ['Uttara Ashadha', 'Shravana', 'Dhanishta'],
-    'Kumbam': ['Dhanishta', 'Shatabhisha', 'Purva Bhadrapada'],
-    'Meenam': ['Purva Bhadrapada', 'Uttara Bhadrapada', 'Revati'],
+    'Mesham': ['Ashwini', 'Parani', 'Kiruthigal'],
+    'Risabam': ['Kiruthigal', 'Rohini', 'Mrigashirsha'],
+    'Mithunam': ['Mrigashirsha', 'Thiruvathirai', 'Punarpoosam'],
+    'Kadagam': ['Punarpoosam', 'Poosam', 'Aayiliyam'],
+    'Simmem': ['Magam', 'Pooram', 'Uthiram'],
+    'Kanni': ['Uthiram', 'Hastam', 'Chitrirai'],
+    'Thulam': ['Chithirai', 'Swati', 'Visagam'],
+    'Viruchigam': ['Visagam', 'Anusham', 'Kettai'],
+    'Thanusu': ['Moolam', 'Pooradam', 'Utharadam'],
+    'Makaram': ['Utharadam', 'Thiruvonam', 'Avitam'],
+    'Kumbam': ['Avitam', 'Sadhayam', 'Pooratadhi'],
+    'Meenam': ['Pooratadhi', 'Uthiratadhi', 'Revati'],
   };
 
   String? selectedRasi;
@@ -33,6 +47,15 @@ class _AddRasiDialogState extends State<AddRasiDialog> {
 
   @override
   Widget build(BuildContext context) {
+    return BlocBuilder<DemoBloc, dynamic>(
+      buildWhen: (previous, current) => false,
+      builder: (context, state) {
+        return mainContainer();
+      },
+    );
+  }
+
+  Widget mainContainer() {
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       backgroundColor: Colors.white,
@@ -48,7 +71,6 @@ class _AddRasiDialogState extends State<AddRasiDialog> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                /// Top Row
                 Row(
                   children: [
                     Expanded(
@@ -155,7 +177,7 @@ class _AddRasiDialogState extends State<AddRasiDialog> {
 
                 const SizedBox(height: 20),
 
-                /// Submit & Add Buttons
+                /// Buttons
                 Row(
                   children: [
                     Expanded(
@@ -168,7 +190,6 @@ class _AddRasiDialogState extends State<AddRasiDialog> {
                           if (_formKey.currentState!.validate()) {
                             Navigator.pop(context);
                             print('Submitted: ${nameController.text}, $selectedRasi, $selectedNatchathra');
-                            // You can pass this data back or handle it as needed.
                           }
                         },
                         child: Text("Submit", style: MyTextStyle.f16(whiteColor)),

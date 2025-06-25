@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:simple/Bloc/demo/demo_bloc.dart';
 import 'package:simple/Reusable/color.dart';
 import 'package:simple/Reusable/text_styles.dart';
 import 'package:simple/UI/ButtomNavigationBar/buttomnavigation.dart';
@@ -8,7 +10,10 @@ class ContactScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const ContactScreenView();
+    return BlocProvider(
+      create: (_) => DemoBloc(),
+      child: const ContactScreenView(),
+    );
   }
 }
 
@@ -22,31 +27,34 @@ class ContactScreenView extends StatefulWidget {
 class ContactScreenViewState extends State<ContactScreenView> {
   @override
   Widget build(BuildContext context) {
-    return PopScope(
-      canPop: false,
-      onPopInvoked: (didPop) {
-        if (!didPop) {
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (_) => const DashboardScreen()),
-                (route) => false,
-          );
-        }
-      },
-      child: Scaffold(
-        backgroundColor: whiteColor,
-        appBar: AppBar(
-          backgroundColor: appPrimaryColor,
-          title: Text(
-            'Temple Management System',
-            style: MyTextStyle.f20(
-              whiteColor,
-              weight: FontWeight.bold,
+    return BlocBuilder<DemoBloc, dynamic>(
+      buildWhen: (previous, current) => false,
+      builder: (context, state) {
+        return PopScope(
+          canPop: false,
+          onPopInvoked: (didPop) {
+            if (!didPop) {
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (_) => const DashboardScreen()),
+                    (route) => false,
+              );
+            }
+          },
+          child: Scaffold(
+            backgroundColor: whiteColor,
+            appBar: AppBar(
+              backgroundColor: appPrimaryColor,
+              title: Text(
+                'Temple Management System',
+                style: MyTextStyle.f20(whiteColor, weight: FontWeight.bold),
+              ),
+              centerTitle: true,
             ),
+            body: mainContainer(),
           ),
-        ),
-        body: mainContainer(),
-      ),
+        );
+      },
     );
   }
 
@@ -61,12 +69,6 @@ class ContactScreenViewState extends State<ContactScreenView> {
             style: MyTextStyle.f32(appPrimaryColor),
             textAlign: TextAlign.center,
           ),
-          // const SizedBox(height: 20),
-          // Text(
-          //   'We would love to hear from you. Feel free to reach out through any of the following channels.',
-          //   style: MyTextStyle.f16(greyColor),
-          //   textAlign: TextAlign.center,
-          // ),
           const SizedBox(height: 40),
           contactCardsSection(),
           followUsSection(),
@@ -96,75 +98,21 @@ class ContactScreenViewState extends State<ContactScreenView> {
             return Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                Expanded(
-                  child: buildContactCard(
-                    icon: Icons.location_on,
-                    title: 'Address',
-                    content: '123 Temple Street, Chennai',
-                    cardBackgroundColor: cardBackgroundColorcontact,
-                    textColor: textColorcontact,
-                    secondaryTextColor: secondaryTextColorcontact,
-                    iconColor: iconColor,
-                  ),
-                ),
+                Expanded(child: buildContactCard(icon: Icons.location_on, title: 'Address', content: '123 Temple Street, Chennai')),
                 const SizedBox(width: 20),
-                Expanded(
-                  child: buildContactCard(
-                    icon: Icons.phone,
-                    title: 'Phone',
-                    content: '+91 98765 43210',
-                    cardBackgroundColor: cardBackgroundColorcontact,
-                    textColor: textColorcontact,
-                    secondaryTextColor: secondaryTextColorcontact,
-                    iconColor: iconColor,
-                  ),
-                ),
+                Expanded(child: buildContactCard(icon: Icons.phone, title: 'Phone', content: '+91 98765 43210')),
                 const SizedBox(width: 20),
-                Expanded(
-                  child: buildContactCard(
-                    icon: Icons.mail,
-                    title: 'Mail',
-                    content: 'info@temple.com',
-                    cardBackgroundColor: cardBackgroundColorcontact,
-                    textColor: textColorcontact,
-                    secondaryTextColor: secondaryTextColorcontact,
-                    iconColor: iconColor,
-                  ),
-                ),
+                Expanded(child: buildContactCard(icon: Icons.mail, title: 'Mail', content: 'info@temple.com')),
               ],
             );
           } else {
             return Column(
               children: [
-                buildContactCard(
-                  icon: Icons.location_on,
-                  title: 'Address',
-                  content: '123 Temple Street, Chennai',
-                  cardBackgroundColor: cardBackgroundColorcontact,
-                  textColor: textColorcontact,
-                  secondaryTextColor: secondaryTextColorcontact,
-                  iconColor: iconColor,
-                ),
+                buildContactCard(icon: Icons.location_on, title: 'Address', content: '123 Temple Street, Chennai'),
                 const SizedBox(height: 20),
-                buildContactCard(
-                  icon: Icons.phone,
-                  title: 'Phone',
-                  content: '+91 98765 43210',
-                  cardBackgroundColor: cardBackgroundColorcontact,
-                  textColor: textColorcontact,
-                  secondaryTextColor: secondaryTextColorcontact,
-                  iconColor: iconColor,
-                ),
+                buildContactCard(icon: Icons.phone, title: 'Phone', content: '+91 98765 43210'),
                 const SizedBox(height: 20),
-                buildContactCard(
-                  icon: Icons.mail,
-                  title: 'Mail',
-                  content: 'info@temple.com',
-                  cardBackgroundColor: cardBackgroundColorcontact,
-                  textColor: textColorcontact,
-                  secondaryTextColor: secondaryTextColorcontact,
-                  iconColor: iconColor,
-                ),
+                buildContactCard(icon: Icons.mail, title: 'Mail', content: 'info@temple.com'),
               ],
             );
           }
@@ -177,17 +125,13 @@ class ContactScreenViewState extends State<ContactScreenView> {
     required IconData icon,
     required String title,
     required String content,
-    required Color cardBackgroundColor,
-    required Color textColor,
-    required Color secondaryTextColor,
-    required Color iconColor,
   }) {
     return Container(
       height: 250,
       width: 250,
       padding: const EdgeInsets.all(24.0),
       decoration: BoxDecoration(
-        color: cardBackgroundColor,
+        color: cardBackgroundColorcontact,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -210,19 +154,13 @@ class ContactScreenViewState extends State<ContactScreenView> {
             child: Icon(icon, color: iconColor, size: 40),
           ),
           const SizedBox(height: 24),
-          Text(
-            title,
-            style: MyTextStyle.f20(textColor),
-            textAlign: TextAlign.center,
-          ),
+          Text(title, style: MyTextStyle.f20(textColorcontact), textAlign: TextAlign.center),
           const SizedBox(height: 8),
-          Text(
-            content,
-            style: MyTextStyle.f16(secondaryTextColor),
-            textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
+          Text(content,
+              style: MyTextStyle.f16(secondaryTextColorcontact),
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis),
         ],
       ),
     );
@@ -240,10 +178,7 @@ class ContactScreenViewState extends State<ContactScreenView> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 40),
-        Text(
-          "Follow us",
-          style: MyTextStyle.f20(appPrimaryColor, weight: FontWeight.bold),
-        ),
+        Text("Follow us", style: MyTextStyle.f20(appPrimaryColor, weight: FontWeight.bold)),
         const SizedBox(height: 16),
         Container(
           padding: const EdgeInsets.all(16),
@@ -274,10 +209,7 @@ class ContactScreenViewState extends State<ContactScreenView> {
                     backgroundColor: Colors.white,
                   ),
                   const SizedBox(height: 8),
-                  Text(
-                    item['label']!,
-                    style: MyTextStyle.f14(blackColor),
-                  ),
+                  Text(item['label']!, style: MyTextStyle.f14(blackColor)),
                 ],
               );
             }).toList(),

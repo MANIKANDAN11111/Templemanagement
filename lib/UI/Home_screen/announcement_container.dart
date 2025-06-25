@@ -119,7 +119,6 @@ class AnnouncementContainer extends StatelessWidget {
           ),
 
           const SizedBox(height: 12),
-
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: List.generate(announcements.length, (int index) {
@@ -132,7 +131,7 @@ class AnnouncementContainer extends StatelessWidget {
                   shape: BoxShape.circle,
                   color: currentPage == index
                       ? appPrimaryColor
-                      : Colors.grey.withOpacity(0.4),
+                      : greyColor,
                 ),
               );
             }),

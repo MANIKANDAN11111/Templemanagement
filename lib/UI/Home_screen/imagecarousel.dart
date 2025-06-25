@@ -78,7 +78,8 @@ class _ImageCarouselViewState extends State<ImageCarouselView> {
                   width: double.infinity,
                 );
               },
-              onPageChanged: (index) {
+              onPageChanged: (index)
+              {
                 setState(() => _currentPage = index);
               },
             ),
@@ -99,7 +100,7 @@ class _ImageCarouselViewState extends State<ImageCarouselView> {
                   decoration: BoxDecoration(
                     color: _currentPage == index
                         ? appPrimaryColor
-                        : Colors.white70,
+                        : whiteColor,
                     borderRadius: BorderRadius.circular(4),
                   ),
                 ),
@@ -110,12 +111,12 @@ class _ImageCarouselViewState extends State<ImageCarouselView> {
       ),
     );
   }
-
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<DemoBloc, dynamic>(
       buildWhen: (previous, current) => false,
-      builder: (context, state) {
+      builder: (context, state)
+      {
         return mainContainer();
       },
     );
