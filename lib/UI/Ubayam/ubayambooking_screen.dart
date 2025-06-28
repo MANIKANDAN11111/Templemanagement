@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:simple/Reusable/color.dart';
 import 'package:simple/Reusable/text_styles.dart';
 import 'package:simple/Bloc/demo/demo_bloc.dart';
+import 'package:simple/UI/ButtomNavigationBar/buttomnavigation.dart';
 
 class UbayamBookingScreen extends StatelessWidget {
   final DateTime selectedDate;
@@ -31,14 +33,12 @@ class _UbayamBookingScreenViewState extends State<UbayamBookingScreenView> {
   String? selectedDelvam;
   String? selectedSlot;
   String? selectedPackage;
-  final TextEditingController nameController = TextEditingController();
-  final TextEditingController phoneController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController totalAmountController = TextEditingController(text: '0');
   final TextEditingController paidAmountController = TextEditingController(text: '0');
   final TextEditingController balanceAmountController = TextEditingController(text: '0');
 
-  List<Map<String, String?>> rasiStarFields = [];
+  final List<Map<String, dynamic>> _persons = [];
 
   final List<String> rasiOptions = [
     'Mesham', 'Risabam', 'Mithunam', 'Kadagam', 'Simmem', 'Kanni',
@@ -59,6 +59,11 @@ class _UbayamBookingScreenViewState extends State<UbayamBookingScreenView> {
     'Meenam': ['Pooratadhi', 'Uthiratadhi', 'Revati'],
   };
 
+  String _phoneNumber = '';
+  String _countryCode = '+91';
+
+  static const int _maxPersons = 5;
+
   List<String> getStarOptions(String? selectedRasi) {
     if (selectedRasi == null) return [];
     return rasiToStars[selectedRasi] ?? [];
@@ -67,7 +72,7 @@ class _UbayamBookingScreenViewState extends State<UbayamBookingScreenView> {
   @override
   void initState() {
     super.initState();
-    _addRasiStarField();
+    _addPerson();
     paidAmountController.addListener(_updateBalanceAmount);
     totalAmountController.addListener(_updateBalanceAmount);
   }
@@ -76,6 +81,14 @@ class _UbayamBookingScreenViewState extends State<UbayamBookingScreenView> {
   void dispose() {
     paidAmountController.removeListener(_updateBalanceAmount);
     totalAmountController.removeListener(_updateBalanceAmount);
+    emailController.dispose();
+    totalAmountController.dispose();
+    paidAmountController.dispose();
+    balanceAmountController.dispose();
+
+    for (var person in _persons) {
+      (person['name'] as TextEditingController).dispose();
+    }
     super.dispose();
   }
 
@@ -86,20 +99,30 @@ class _UbayamBookingScreenViewState extends State<UbayamBookingScreenView> {
     balanceAmountController.text = balance.toStringAsFixed(2);
   }
 
-  void _addRasiStarField() {
-    if (rasiStarFields.length < 5) {
+  void _addPerson() {
+    if (_persons.length < _maxPersons) {
       setState(() {
-        rasiStarFields.add({'rasi': null, 'star': null});
+        _persons.add({
+          'name': TextEditingController(),
+          'rasi': null,
+          'star': null,
+        });
       });
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Maximum of 5 persons reached.'),
+          duration: Duration(seconds: 2),
+        ),
+      );
     }
   }
 
-  void _removeRasiStarField(int index) {
-    if (rasiStarFields.length > 1) {
-      setState(() {
-        rasiStarFields.removeAt(index);
-      });
-    }
+  void _removePerson(int index) {
+    setState(() {
+      (_persons[index]['name'] as TextEditingController).dispose();
+      _persons.removeAt(index);
+    });
   }
 
   void _submitForm() {
@@ -107,13 +130,18 @@ class _UbayamBookingScreenViewState extends State<UbayamBookingScreenView> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Booking submitted for ${DateFormat('MMMM d, yyyy').format(widget.selectedDate)}',
+            'Booking submitted for ${DateFormat('MMMM d, y').format(widget.selectedDate)}',
             style: MyTextStyle.f14(Colors.white),
           ),
           backgroundColor: Colors.green,
         ),
       );
-      Navigator.pop(context);
+      // Navigate to DashboardScreen after successful submission
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (_) => const DashboardScreen()),
+            (route) => false,
+      );
     }
   }
 
@@ -124,13 +152,18 @@ class _UbayamBookingScreenViewState extends State<UbayamBookingScreenView> {
         return Scaffold(
           appBar: AppBar(
             title: Text(
-              'Ubayam Booking',
-              style: MyTextStyle.f20(whiteColor, weight: FontWeight.bold),
+              'Ubayam',
+              style: MyTextStyle.f18(whiteColor, weight: FontWeight.bold),
             ),
             leading: IconButton(
-              onPressed: () => Navigator.pop(context),
-              icon: const Icon(Icons.arrow_back),
-              color: whiteColor,
+              icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white,size: 18,),
+              onPressed: () {
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (_) => const DashboardScreen()),
+                      (route) => false,
+                );
+              },
             ),
             centerTitle: true,
             backgroundColor: appPrimaryColor,
@@ -142,6 +175,8 @@ class _UbayamBookingScreenViewState extends State<UbayamBookingScreenView> {
   }
 
   Widget mainContainer() {
+    bool isMaxPersonsReached = _persons.length >= _maxPersons;
+
     return Form(
       key: _formKey,
       child: Padding(
@@ -151,8 +186,8 @@ class _UbayamBookingScreenViewState extends State<UbayamBookingScreenView> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildSectionTitle('Ubayam Date'),
-              Text(DateFormat('MMMM d, yyyy').format(widget.selectedDate),
-                  style: MyTextStyle.f16(greyColor800)),
+              Text(DateFormat('MMMM d, y').format(widget.selectedDate),
+                  style: MyTextStyle.f16(appPrimaryColor)),
               const SizedBox(height: 16),
               _buildDropdown('Deivam', selectedDelvam, ['Deivam 1', 'Deivam 2', 'Deivam 3'], (value) {
                 setState(() => selectedDelvam = value);
@@ -180,76 +215,122 @@ class _UbayamBookingScreenViewState extends State<UbayamBookingScreenView> {
               const SizedBox(height: 16),
               _buildAmountField('Balance Amount', balanceAmountController, readOnly: true),
               const SizedBox(height: 16),
-              _buildTextField('Name', nameController, 'Enter your name'),
+
+              _buildSectionTitle('Phone Number'),
+              const SizedBox(height: 4),
+              IntlPhoneField(
+                decoration: _inputDecoration(hintText: 'Phone Number', icon: Icons.phone),
+                initialCountryCode: 'IN',
+                onChanged: (phone) {
+                  setState(() {
+                    _countryCode = phone.countryCode;
+                    _phoneNumber = phone.number;
+                  });
+                },
+                validator: (phone) {
+                  if (phone == null || phone.number.isEmpty) {
+                    return 'Please enter your phone number';
+                  }
+                  return null;
+                },
+                cursorColor: appPrimaryColor,
+              ),
               const SizedBox(height: 16),
-              _buildTextField('Phone', phoneController, 'Enter your phone number',
-                  keyboardType: TextInputType.phone),
-              const SizedBox(height: 16),
+
               _buildTextField('Email', emailController, 'Enter your email',
                   keyboardType: TextInputType.emailAddress, emailValidation: true),
               const SizedBox(height: 16),
-              Text('Rasi and Star', style: MyTextStyle.f16(Colors.grey[800]!, weight: FontWeight.bold)),
+
+              Text(
+                'Person Details',
+                style: MyTextStyle.f16(appPrimaryColor, weight: FontWeight.bold),
+              ),
               const SizedBox(height: 8),
-              ...rasiStarFields.asMap().entries.map((entry) {
+
+              ..._persons.asMap().entries.map((entry) {
                 final index = entry.key;
-                final field = entry.value;
-                return Column(
-                  children: [
-                    DropdownButtonFormField<String>(
-                      value: field['rasi'],
-                      decoration: _inputDecoration('Select Rasi'),
-                      validator: (value) => value == null ? 'Please select Rasi' : null,
-                      items: rasiOptions.map((rasi) => DropdownMenuItem(value: rasi, child: Text(rasi))).toList(),
-                      onChanged: (value) {
-                        setState(() {
-                          rasiStarFields[index]['rasi'] = value;
-                          rasiStarFields[index]['star'] = null;
-                        });
-                      },
-                    ),
-                    const SizedBox(height: 8),
-                    DropdownButtonFormField<String>(
-                      value: field['star'],
-                      decoration: _inputDecoration('Select Star'),
-                      validator: (value) => value == null ? 'Please select Star' : null,
-                      items: getStarOptions(field['rasi'])
-                          .map((star) => DropdownMenuItem(value: star, child: Text(star)))
-                          .toList(),
-                      onChanged: field['rasi'] == null
-                          ? null
-                          : (value) {
-                        setState(() {
-                          rasiStarFields[index]['star'] = value;
-                        });
-                      },
-                    ),
-                    if (rasiStarFields.length > 1)
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: TextButton.icon(
-                          onPressed: () => _removeRasiStarField(index),
-                          icon: const Icon(Icons.remove, color: Colors.red),
-                          label: Text('Remove', style: MyTextStyle.f14(Colors.red)),
-                        ),
+                final person = entry.value;
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 16),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: appPrimaryColor.withOpacity(0.5)),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text('Person ${index + 1}',
+                              style: MyTextStyle.f16(appPrimaryColor, weight: FontWeight.bold)),
+                          if (_persons.length > 1)
+                            TextButton.icon(
+                              onPressed: () => _removePerson(index),
+                              icon: const Icon(Icons.remove_circle_outline, color: Colors.red),
+                              label: Text('Remove', style: MyTextStyle.f14(Colors.red)),
+                            ),
+                        ],
                       ),
-                    const SizedBox(height: 16),
-                  ],
+                      const SizedBox(height: 8),
+                      TextFormField(
+                        controller: person['name'] as TextEditingController,
+                        decoration: _inputDecoration(labelText: 'Name', hintText: 'Enter name'),
+                        validator: (value) =>
+                        value == null || value.isEmpty ? 'Please enter person\'s name' : null,
+                        cursorColor: appPrimaryColor,
+                      ),
+                      const SizedBox(height: 16),
+                      DropdownButtonFormField<String>(
+                        value: person['rasi'] as String?,
+                        decoration: _inputDecoration(labelText: 'Select Rasi', hintText: 'Rasi'),
+                        validator: (value) => value == null ? 'Please select Rasi' : null,
+                        items: rasiOptions.map((rasi) => DropdownMenuItem(value: rasi, child: Text(rasi))).toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            person['rasi'] = value;
+                            person['star'] = null;
+                          });
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      DropdownButtonFormField<String>(
+                        value: person['star'] as String?,
+                        decoration: _inputDecoration(labelText: 'Select Star', hintText: 'Star'),
+                        validator: (value) => value == null ? 'Please select Star' : null,
+                        items: getStarOptions(person['rasi'] as String?)
+                            .map((star) => DropdownMenuItem(value: star, child: Text(star))).toList(),
+                        onChanged: (person['rasi'] == null)
+                            ? null
+                            : (value) {
+                          setState(() {
+                            person['star'] = value;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
                 );
               }).toList(),
-              if (rasiStarFields.length < 5)
+              const SizedBox(height: 8),
+              if (!isMaxPersonsReached)
                 Align(
                   alignment: Alignment.centerRight,
                   child: ElevatedButton.icon(
-                    onPressed: _addRasiStarField,
+                    onPressed: _addPerson,
                     icon: const Icon(Icons.add),
-                    label: const Text('Add Rasi/Star'),
+                    label: const Text('Add Another Person'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: appPrimaryColor,
                       foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ),
                   ),
                 ),
               const SizedBox(height: 24),
+
               Row(
                 children: [
                   Expanded(
@@ -288,7 +369,7 @@ class _UbayamBookingScreenViewState extends State<UbayamBookingScreenView> {
 
   Widget _buildSectionTitle(String title) => Text(
     title,
-    style: MyTextStyle.f16(greyColor800, weight: FontWeight.bold),
+    style: MyTextStyle.f16(appPrimaryColor, weight: FontWeight.bold),
   );
 
   Widget _buildDropdown(String label, String? value, List<String> options, void Function(String?) onChanged) {
@@ -299,7 +380,7 @@ class _UbayamBookingScreenViewState extends State<UbayamBookingScreenView> {
         const SizedBox(height: 4),
         DropdownButtonFormField<String>(
           value: value,
-          decoration: _inputDecoration('Select $label'),
+          decoration: _inputDecoration(hintText: 'Select $label'),
           validator: (val) => val == null ? 'Please select $label' : null,
           items: options.map((item) => DropdownMenuItem(value: item, child: Text(item))).toList(),
           onChanged: onChanged,
@@ -318,7 +399,7 @@ class _UbayamBookingScreenViewState extends State<UbayamBookingScreenView> {
           controller: controller,
           keyboardType: TextInputType.number,
           readOnly: readOnly,
-          decoration: _inputDecoration(''),
+          decoration: _inputDecoration(hintText: label),
           validator: (value) {
             if (!readOnly && (value == null || value.isEmpty)) {
               return 'Please enter $label';
@@ -328,6 +409,7 @@ class _UbayamBookingScreenViewState extends State<UbayamBookingScreenView> {
             }
             return null;
           },
+          cursorColor: appPrimaryColor,
         ),
       ],
     );
@@ -343,19 +425,39 @@ class _UbayamBookingScreenViewState extends State<UbayamBookingScreenView> {
         TextFormField(
           controller: controller,
           keyboardType: keyboardType,
-          decoration: _inputDecoration(hint),
+          decoration: _inputDecoration(hintText: hint),
           validator: (value) {
             if (value == null || value.isEmpty) return 'Please enter $label';
             if (emailValidation && !value.contains('@')) return 'Please enter valid email';
             return null;
           },
+          cursorColor: appPrimaryColor,
         ),
       ],
     );
   }
 
-  InputDecoration _inputDecoration(String hint) => InputDecoration(
-    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-    hintText: hint,
+  InputDecoration _inputDecoration({String? labelText, String? hintText, IconData? icon}) => InputDecoration(
+    labelText: labelText,
+    labelStyle: labelText != null ? TextStyle(color: appPrimaryColor) : null,
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(8),
+      borderSide: BorderSide(color: appPrimaryColor),
+    ),
+    focusedBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(8),
+      borderSide: BorderSide(color: appPrimaryColor, width: 2),
+    ),
+    errorBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(8),
+      borderSide: const BorderSide(color: Colors.red),
+    ),
+    focusedErrorBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(8),
+      borderSide: const BorderSide(color: Colors.red, width: 2),
+    ),
+    hintText: hintText,
+    prefixIcon: icon != null ? Icon(icon, color: appPrimaryColor) : null,
+    contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
   );
 }

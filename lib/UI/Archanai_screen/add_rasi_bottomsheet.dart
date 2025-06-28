@@ -4,6 +4,18 @@ import 'package:simple/Bloc/demo/demo_bloc.dart';
 import 'package:simple/Reusable/color.dart';
 import 'package:simple/Reusable/text_styles.dart';
 
+class RasiDetail {
+  final String name;
+  final String rasi;
+  final String natchathra;
+
+  RasiDetail({
+    required this.name,
+    required this.rasi,
+    required this.natchathra,
+  });
+}
+
 class AddRasiDialog extends StatelessWidget {
   const AddRasiDialog({super.key});
 
@@ -107,8 +119,6 @@ class _AddRasiDialogViewState extends State<AddRasiDialogView> {
                 ),
 
                 const SizedBox(height: 10),
-
-                /// Rasi Dropdown
                 Text("Rasi *", style: MyTextStyle.f16(appPrimaryColor)),
                 const SizedBox(height: 5),
                 DropdownButtonFormField<String>(
@@ -141,8 +151,6 @@ class _AddRasiDialogViewState extends State<AddRasiDialogView> {
                 ),
 
                 const SizedBox(height: 10),
-
-                /// Natchathra Dropdown
                 Text("Natchathra *", style: MyTextStyle.f16(appPrimaryColor)),
                 const SizedBox(height: 5),
                 DropdownButtonFormField<String>(
@@ -176,8 +184,6 @@ class _AddRasiDialogViewState extends State<AddRasiDialogView> {
                 ),
 
                 const SizedBox(height: 20),
-
-                /// Buttons
                 Row(
                   children: [
                     Expanded(
@@ -188,27 +194,28 @@ class _AddRasiDialogViewState extends State<AddRasiDialogView> {
                         ),
                         onPressed: () {
                           if (_formKey.currentState!.validate()) {
-                            Navigator.pop(context);
-                            print('Submitted: ${nameController.text}, $selectedRasi, $selectedNatchathra');
+                            Navigator.pop(
+                                context,
+                                RasiDetail(
+                                  name: nameController.text,
+                                  rasi: selectedRasi!,
+                                  natchathra: selectedNatchathra!,
+                                ));
                           }
                         },
-                        child: Text("Submit", style: MyTextStyle.f16(whiteColor)),
+                        child: Text("Add", style: MyTextStyle.f16(whiteColor)),
                       ),
                     ),
                     const SizedBox(width: 10),
                     Expanded(
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: appPrimaryColor,
+                          backgroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(vertical: 12),
+                          side: const BorderSide(color: appPrimaryColor),
                         ),
-                        onPressed: () {
-                          if (_formKey.currentState!.validate()) {
-                            Navigator.pop(context);
-                            print('Added: ${nameController.text}, $selectedRasi, $selectedNatchathra');
-                          }
-                        },
-                        child: Text("Add", style: MyTextStyle.f16(whiteColor)),
+                        onPressed: () => Navigator.pop(context),
+                        child: Text("Cancel", style: MyTextStyle.f16(appPrimaryColor)),
                       ),
                     ),
                   ],

@@ -8,6 +8,7 @@ import 'package:simple/UI/Contact/contact_screen.dart';
 import 'package:simple/UI/Login/login.dart';
 import 'package:simple/Reusable/color.dart';
 import 'package:simple/Reusable/text_styles.dart';
+import 'package:simple/UI/profile/profile_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -21,7 +22,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   final List<Widget> _pages = const [
     HomeScreen(),
-    LoginPage(),
+    ProfileScreen(),
+    // LoginPage(),
     ContactScreen(),
   ];
 

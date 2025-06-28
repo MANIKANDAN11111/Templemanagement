@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:simple/Reusable/color.dart';
 import 'package:simple/Reusable/text_styles.dart';
+import 'package:simple/UI/ButtomNavigationBar/buttomnavigation.dart';
 import 'package:simple/UI/Ubayam/ubayambooking_screen.dart';
 import 'package:simple/Bloc/demo/demo_bloc.dart';
 
@@ -36,23 +37,20 @@ class _UbayamCalendarScreenViewState extends State<UbayamCalendarScreenView> {
         return Scaffold(
           appBar: AppBar(
             title: Text(
-              'Ubayam Booking Calendar',
-              style: MyTextStyle.f20(Colors.white, weight: FontWeight.bold),
+              'Ubayam',
+              style: MyTextStyle.f18(Colors.white, weight: FontWeight.bold),
             ),
+            backgroundColor: appPrimaryColor,
             centerTitle: true,
-            flexibleSpace: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [appPrimaryColor, appPrimaryColor.withOpacity(0.8)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-              ),
-            ),
             leading: IconButton(
-              onPressed: () => Navigator.pop(context),
-              icon: const Icon(Icons.arrow_back),
-              color: whiteColor,
+              icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white,size: 18,),
+              onPressed: () {
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (_) => const DashboardScreen()),
+                      (route) => false,
+                );
+              },
             ),
           ),
           body: mainContainer(),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:simple/Reusable/color.dart';
 import 'package:simple/Reusable/text_styles.dart';
+import 'package:simple/UI/ButtomNavigationBar/buttomnavigation.dart';
 import 'package:simple/UI/Prasadam_screen/prasadam_item.dart';
 import 'package:simple/Bloc/demo/demo_bloc.dart';
 
@@ -55,19 +56,56 @@ class _PrasadamViewState extends State<PrasadamView> with TickerProviderStateMix
   void removeItem(PrasadamItem item) => setState(() => item.quantity = 0);
   void clearCart() => setState(() => items.forEach((item) => item.quantity = 0));
 
+  Future<void> _showPaymentSuccessDialog(BuildContext context) async {
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Payment Successful", style: MyTextStyle.f16(appPrimaryColor, weight: FontWeight.bold)),
+          content: Text("Your payment of ₹${getTotalAmount().toStringAsFixed(2)} was successful.",
+              style: MyTextStyle.f14(blackColor)),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (_) => const DashboardScreen()),
+                      (route) => false,
+                );
+              },
+              child: Text("OK", style: MyTextStyle.f14(appPrimaryColor, weight: FontWeight.bold)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Widget mainContainer() {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: appPrimaryColor,
         iconTheme: const IconThemeData(color: Colors.white),
-        title: Text("Prasadam", style: MyTextStyle.f20(whiteColor, weight: FontWeight.bold)),
+        title: Text("Prasadam", style: MyTextStyle.f18(whiteColor, weight: FontWeight.bold)),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 18),
+          onPressed: () {
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (_) => const DashboardScreen()),
+                  (route) => false,
+            );
+          },
+        ),
         bottom: TabBar(
           controller: _tabController,
           tabs: const [Tab(text: "Bookings"), Tab(text: "Cart")],
           labelColor: Colors.white,
           unselectedLabelColor: Colors.white,
         ),
+        centerTitle: true,
       ),
       body: TabBarView(
         controller: _tabController,
@@ -151,7 +189,11 @@ class _PrasadamViewState extends State<PrasadamView> with TickerProviderStateMix
                 onPressed: () => _showBillDialog(context),
                 child: Text("View Detailed Bill", style: MyTextStyle.f14(appPrimaryColor, weight: FontWeight.bold)),
               ),
-              _bottomTotalSection(context, label: "Pay Now", onPressed: () {})
+              _bottomTotalSection(
+                context,
+                label: "Pay Now",
+                onPressed: () => _showPaymentSuccessDialog(context),
+              )
             ],
           ),
       ],
@@ -162,12 +204,12 @@ class _PrasadamViewState extends State<PrasadamView> with TickerProviderStateMix
     return GestureDetector(
       onTap: onTap,
       child: Card(
-        color: Colors.white, // Explicit white color
+        color: Colors.white,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
-          side: BorderSide(color: greyColor200), // Light grey border
+          side: BorderSide(color: greyColor200),
         ),
-        elevation: 0, // Remove shadow
+        elevation: 0,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -180,15 +222,15 @@ class _PrasadamViewState extends State<PrasadamView> with TickerProviderStateMix
               child: Column(
                 children: [
                   Text(item.title, textAlign: TextAlign.center,
-                      style: MyTextStyle.f15(blackColor,weight: FontWeight.bold)),
+                      style: MyTextStyle.f14(blackColor, weight: FontWeight.bold)),
                   Text(item.tamilTitle,
-                      style: MyTextStyle.f12(greyColor),),
+                      style: MyTextStyle.f12(greyColor)),
                   const SizedBox(height: 2),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text("₹${item.price}",
-                          style: MyTextStyle.f14(appPrimaryColor,weight: FontWeight.bold),),
+                          style: MyTextStyle.f14(appPrimaryColor, weight: FontWeight.bold)),
                       if (item.quantity > 0)
                         const Padding(
                           padding: EdgeInsets.only(left: 4),
@@ -199,7 +241,7 @@ class _PrasadamViewState extends State<PrasadamView> with TickerProviderStateMix
                   const SizedBox(height: 4),
                   if (item.quantity > 0)
                     Text(
-                      '${item.quantity} Selected', style:MyTextStyle.f12(greenColor,weight: FontWeight.bold,)
+                        '${item.quantity} Selected', style: MyTextStyle.f12(greenColor, weight: FontWeight.bold)
                     ),
                 ],
               ),
@@ -212,14 +254,15 @@ class _PrasadamViewState extends State<PrasadamView> with TickerProviderStateMix
 
   Widget _cartItemCard(PrasadamItem item) {
     return Card(
-      color: Colors.white, // Explicit white color
+      color: Colors.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: greyColor200), // Light grey border
+        side: BorderSide(color: greyColor200),
       ),
-      elevation: 0, // Remove shadow
+      elevation: 0,
       child: Padding(
-        padding: const EdgeInsets.all(8.0),
+        // padding: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.fromLTRB(6, 8, 5, 8),
         child: Column(
           children: [
             ClipRRect(
@@ -227,28 +270,43 @@ class _PrasadamViewState extends State<PrasadamView> with TickerProviderStateMix
               child: Image.asset(item.imageUrl, height: 80, width: double.infinity, fit: BoxFit.cover),
             ),
             const SizedBox(height: 6),
-            Text(item.title, textAlign: TextAlign.center, style: MyTextStyle.f14(blackColor,weight: FontWeight.bold)),
+            Text(item.title, textAlign: TextAlign.center, style: MyTextStyle.f14(blackColor, weight: FontWeight.bold)),
             Text(item.tamilTitle, textAlign: TextAlign.center, style: MyTextStyle.f12(greyColor)),
-            const Spacer(),
+            const SizedBox(height: 8),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,
               children: [
-                IconButton(
-                  icon: const Icon(Icons.remove, size: 20, color: Colors.red),
-                  visualDensity: VisualDensity.compact,
-                  padding: EdgeInsets.zero,
-                  onPressed: () => decreaseQuantity(item),
+                Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(color: appPrimaryColor),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.remove, size: 20, color: Colors.red),
+                        visualDensity: VisualDensity.compact,
+                        padding: EdgeInsets.zero,
+                        onPressed: () => decreaseQuantity(item),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4),
+                        child: Text('${item.quantity}', style: const TextStyle(fontSize: 14)),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.add, size: 20, color: Colors.green),
+                        visualDensity: VisualDensity.compact,
+                        padding: EdgeInsets.zero,
+                        onPressed: () => increaseQuantity(item),
+                      ),
+                    ],
+                  ),
                 ),
-                Text('${item.quantity}', style: const TextStyle(fontSize: 14)),
+                const SizedBox(width: 1),
                 IconButton(
-                  icon: const Icon(Icons.add, size: 20, color: Colors.green),
-                  visualDensity: VisualDensity.compact,
-                  padding: EdgeInsets.zero,
-                  onPressed: () => increaseQuantity(item),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.delete_outline, size: 20, color: Colors.black54),
+                  icon: const Icon(Icons.delete_outline, size: 18, color: Colors.black54),
                   visualDensity: VisualDensity.compact,
                   padding: EdgeInsets.zero,
                   onPressed: () => removeItem(item),
@@ -261,7 +319,10 @@ class _PrasadamViewState extends State<PrasadamView> with TickerProviderStateMix
     );
   }
 
-  Widget _bottomTotalSection(BuildContext context, {required String label, required VoidCallback onPressed}) {
+  Widget _bottomTotalSection(BuildContext context, {
+    required String label,
+    required VoidCallback onPressed
+  }) {
     return Container(
       padding: const EdgeInsets.all(16),
       color: greyColor200,

@@ -5,6 +5,8 @@ import 'package:simple/Reusable/color.dart';
 import 'package:simple/Reusable/text_styles.dart';
 import 'package:simple/UI/Archanai_screen/add_rasi_bottomsheet.dart';
 import 'package:simple/UI/Archanai_screen/archanaitem.dart';
+import 'package:simple/UI/ButtomNavigationBar/buttomnavigation.dart';
+import 'package:simple/UI/Archanai_screen/add_rasi_bottomsheet.dart';
 
 class ArchanaiScreen extends StatelessWidget {
   const ArchanaiScreen({super.key});
@@ -51,6 +53,9 @@ class _ArchanaiScreenViewState extends State<ArchanaiScreenView>
     ArchanaItem('Poosani Lamp', 'பூசணி விளக்கு', 'assets/image/saami.jpg', 10.0),
     ArchanaItem('Ghee Lamp', 'நெய் விளக்கு', 'assets/image/saami.jpg', 10.0),
   ];
+
+  // --- NEW: List to store RasiDetail objects ---
+  List<RasiDetail> rasiDetails = [];
 
   List<ArchanaItem> get allItems => [
     ...generalArchanai,
@@ -111,6 +116,32 @@ class _ArchanaiScreenViewState extends State<ArchanaiScreenView>
     );
   }
 
+  Future<void> _showPaymentSuccessDialog(BuildContext context) async {
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Payment Successful", style: MyTextStyle.f16(appPrimaryColor, weight: FontWeight.bold)),
+          content: Text("Your payment of ₹${getTotalAmount().toStringAsFixed(2)} was successful.",
+              style: MyTextStyle.f14(blackColor)),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (_) => const DashboardScreen()),
+                      (route) => false,
+                );
+              },
+              child: Text("OK", style: MyTextStyle.f14(appPrimaryColor, weight: FontWeight.bold)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Widget mainContainer() {
     return SafeArea(
       child: Scaffold(
@@ -118,7 +149,7 @@ class _ArchanaiScreenViewState extends State<ArchanaiScreenView>
         appBar: AppBar(
           backgroundColor: appPrimaryColor,
           title: Text("Archanai",
-              style: MyTextStyle.f20(whiteColor, weight: FontWeight.bold)),
+              style: MyTextStyle.f18(whiteColor, weight: FontWeight.bold)),
           centerTitle: true,
           bottom: TabBar(
             controller: _tabController,
@@ -130,9 +161,14 @@ class _ArchanaiScreenViewState extends State<ArchanaiScreenView>
             ],
           ),
           leading: IconButton(
-            onPressed: () => Navigator.pop(context),
-            icon: Icon(Icons.arrow_back),
-            color: whiteColor,
+            icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 18),
+            onPressed: () {
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (_) => const DashboardScreen()),
+                    (route) => false,
+              );
+            },
           ),
         ),
         body: TabBarView(
@@ -315,106 +351,289 @@ class _ArchanaiScreenViewState extends State<ArchanaiScreenView>
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  onPressed: () {
-                    showModalBottomSheet(
+                  onPressed: () async { // --- MODIFIED: Made onPressed async ---
+                    final RasiDetail? newRasiDetail = await showModalBottomSheet<RasiDetail>(
                       context: context,
                       isScrollControlled: true,
                       backgroundColor: Colors.transparent,
                       builder: (_) => const AddRasiDialog(),
                     );
+                    if (newRasiDetail != null) {
+                      setState(() {
+                        rasiDetails.add(newRasiDetail); // --- NEW: Add the returned RasiDetail to the list ---
+                      });
+                    }
                   },
                   child: Text("Add Raasi",
                       style: MyTextStyle.f14(Colors.white, weight: FontWeight.bold)),
                 ),
               ),
               const SizedBox(width: 10),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    side: BorderSide(color: appPrimaryColor),
+              // --- MODIFIED: Ensure "Clear All" is also in an Expanded if it's a sibling of an Expanded ---
+              Expanded(
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      side: const BorderSide(color: appPrimaryColor), // Changed to const
+                    ),
                   ),
+                  onPressed: clearCart,
+                  child: Text("Clear All",
+                      style: MyTextStyle.f14(appPrimaryColor, weight: FontWeight.bold)),
                 ),
-                onPressed: clearCart,
-                child: Text("Clear All",
-                    style: MyTextStyle.f14(appPrimaryColor, weight: FontWeight.bold)),
               )
             ],
           ),
         ),
         Expanded(
-          child: cartItems.isEmpty
-              ? Center(
-            child: Text("No items in cart",
-                style: MyTextStyle.f16(Colors.grey)),
-          )
-              : GridView.builder(
-              padding: const EdgeInsets.all(12),
-              itemCount: cartItems.length,
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-                childAspectRatio: 0.66,
-              ),
-              itemBuilder: (context, index) {
-                final item = cartItems[index];
-                return Card(
-                  color: Colors.white,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      side: BorderSide(color: Colors.grey.shade300)),
-                  elevation: 0,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8),
-                    child: Column(
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: Image.asset(item.imagePath,
-                              height: 100,
-                              width: double.infinity,
-                              fit: BoxFit.cover),
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                if (cartItems.isEmpty)
+                  Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(20.0),
+                      child: Text("No Archana items in cart",
+                          style: MyTextStyle.f16(Colors.grey)),
+                    ),
+                  )
+                else
+                  GridView.builder(
+                    padding: const EdgeInsets.all(12),
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 12,
+                      mainAxisSpacing: 12,
+                      childAspectRatio: 0.70,
+                    ),
+                    itemCount: cartItems.length,
+                    itemBuilder: (context, index) {
+                      final item = cartItems[index];
+                      return Card(
+                        color: Colors.white,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            side: BorderSide(color: Colors.grey.shade300)),
+                        elevation: 0,
+                        child: Padding(
+                          padding: const EdgeInsets.all(8),
+                          child: Column(
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: Image.asset(
+                                  item.imagePath,
+                                  height: 100,
+                                  width: double.infinity,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) =>
+                                      Container(
+                                        height: 100,
+                                        width: double.infinity,
+                                        color: Colors.grey.shade200,
+                                        child: const Icon(Icons.image_not_supported, color: Colors.grey),
+                                      ),
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              Text(
+                                item.title,
+                                textAlign: TextAlign.center,
+                                style: MyTextStyle.f14(
+                                    Colors.black87, weight: FontWeight.bold),
+                              ),
+                              Text(
+                                item.tamilTitle,
+                                style: MyTextStyle.f10(Colors.grey),
+                              ),
+                              const SizedBox(height:4),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      border: Border.all(color: appPrimaryColor),
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        IconButton(
+                                          icon: const Icon(Icons.remove,
+                                              size: 15, color: Colors.red),
+                                          visualDensity: VisualDensity.compact,
+                                          padding: EdgeInsets.zero,
+                                          onPressed: () => decreaseQuantity(item),
+                                        ),
+                                        Padding(
+                                          padding:
+                                          const EdgeInsets.symmetric(horizontal: 1),
+                                          child: Text('${item.quantity}',
+                                              style: const TextStyle(fontSize: 14)),
+                                        ),
+                                        IconButton(
+                                          icon: const Icon(Icons.add,
+                                              size: 18, color: Colors.green),
+                                          visualDensity: VisualDensity.compact,
+                                          padding: EdgeInsets.zero,
+                                          onPressed: () => increaseQuantity(item),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  IconButton(
+                                    icon: const Icon(Icons.delete_outline,
+                                        size: 18, color: Colors.black54),
+                                    visualDensity: VisualDensity.compact,
+                                    padding: EdgeInsets.zero,
+                                    onPressed: () => removeItem(item),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
-                        const SizedBox(height: 6),
-                        Text(item.title,
-                            textAlign: TextAlign.center,
-                            style: MyTextStyle.f14(Colors.black87,
-                                weight: FontWeight.bold)),
-                        Text(item.tamilTitle, style: MyTextStyle.f10(Colors.grey)),
-                        const Spacer(),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
+                      );
+                    },
+                  ),
+
+                if (rasiDetails.isNotEmpty) ...[
+                  const SizedBox(height: 20),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        "Added Rasi Details",
+                        style: MyTextStyle.f16(appPrimaryColor, weight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 7),
+                    child: Table(
+                      border: TableBorder.all(color: Colors.grey.shade300),
+                      columnWidths: const {
+                        0: FlexColumnWidth(1.8),
+                        1: FlexColumnWidth(1.5),
+                        2: FlexColumnWidth(1.5),
+                        3: FlexColumnWidth(1.0),
+                      },
+                      children: [
+                        // Table Header
+                        TableRow(
+                          decoration: BoxDecoration(color: appPrimaryColor.withOpacity(0.1)),
                           children: [
-                            _iconBtn(() => decreaseQuantity(item), Icons.remove, Colors.red),
                             Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 4),
-                              child: Text('${item.quantity}'),
+                              padding: const EdgeInsets.all(8),
+                              child: Text(
+                                "Name",
+                                style: MyTextStyle.f14(blackColor, weight: FontWeight.bold),
+                                textAlign: TextAlign.center,
+                              ),
                             ),
-                            _iconBtn(() => increaseQuantity(item), Icons.add, Colors.green),
-                            _iconBtn(() => removeItem(item), Icons.delete_outline, Colors.black54),
+                            Padding(
+                              padding: const EdgeInsets.all(8),
+                              child: Text(
+                                "Rasi",
+                                style: MyTextStyle.f14(blackColor, weight: FontWeight.bold),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(8),
+                              child: Text(
+                                "Natchathra",
+                                style: MyTextStyle.f14(blackColor, weight: FontWeight.bold),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(8),
+                              child: Text(
+                                "Action",
+                                style: MyTextStyle.f14(blackColor, weight: FontWeight.bold),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
                           ],
-                        )
+                        ),
+                        // Table Rows - dynamically generated from rasiDetails list
+                        ...rasiDetails.map((rasi) => TableRow(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(8),
+                              child: Text(
+                                rasi.name,
+                                style: MyTextStyle.f12(blackColor),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(8),
+                              child: Text(
+                                rasi.rasi,
+                                style: MyTextStyle.f12(blackColor),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(8),
+                              child: Text(
+                                rasi.natchathra,
+                                style: MyTextStyle.f12(blackColor),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.delete, size: 18, color: Colors.red),
+                              onPressed: () {
+                                setState(() {
+                                  rasiDetails.remove(rasi); // Allow deleting Rasi detail
+                                });
+                              },
+                            ),
+                          ],
+                        )).toList(),
                       ],
                     ),
                   ),
-                );
-              }),
+                  const SizedBox(height: 20),
+                ]
+                else if (cartItems.isEmpty) // Only show this if both are empty
+                  Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(20.0),
+                      child: Text("No Archana items or Rasi details added yet", // Changed text
+                          style: MyTextStyle.f16(Colors.grey)),
+                    ),
+                  ),
+              ],
+            ),
+          ),
         ),
-        if (getTotalAmount() > 0)
+        // --- MODIFIED: Show total bar if either cart items OR Rasi details exist ---
+        if (getTotalAmount() > 0 || rasiDetails.isNotEmpty)
           Column(
             children: [
               TextButton(
                 onPressed: () => _showBillDialog(context),
-                child: Text("View Detailed Bill",
-                    style: MyTextStyle.f14(appPrimaryColor, weight: FontWeight.bold)),
+                child: Text(
+                  "View Detailed Bill",
+                  style: MyTextStyle.f14(appPrimaryColor, weight: FontWeight.bold),
+                ),
               ),
               _bottomTotalBar("Pay Now", () {
-                // Add payment logic here
+                _showPaymentSuccessDialog(context);
               }),
             ],
-          )
+          ),
       ],
     );
   }

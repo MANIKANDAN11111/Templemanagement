@@ -77,7 +77,7 @@ class _ServicesSectionViewState extends State<ServicesSectionView> {
           padding: const EdgeInsets.symmetric(vertical: 30),
           child: Text(
             'Our Services',
-            style: MyTextStyle.f20(
+            style: MyTextStyle.f18(
               appPrimaryColor,
               weight: FontWeight.bold,
             ),
@@ -135,7 +135,7 @@ class _ServicesSectionViewState extends State<ServicesSectionView> {
                     }
                   },
                   child: Card(
-                    color: Colors.white, // Add this line to make the card white
+                    color: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),

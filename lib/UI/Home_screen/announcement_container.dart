@@ -37,7 +37,7 @@ class AnnouncementContainer extends StatelessWidget {
             children: [
               Text(
                 "Announcements",
-                style: MyTextStyle.f20(appPrimaryColor, weight: FontWeight.bold),
+                style: MyTextStyle.f16(appPrimaryColor, weight: FontWeight.bold),
               ),
               TextButton(
                 onPressed: () {
@@ -96,7 +96,7 @@ class AnnouncementContainer extends StatelessWidget {
                       const SizedBox(height: 16),
                       Text(
                         item["title"]!,
-                        style: MyTextStyle.f18(appPrimaryColor, weight: FontWeight.bold),
+                        style: MyTextStyle.f16(appPrimaryColor, weight: FontWeight.bold),
                       ),
                       const SizedBox(height: 8),
                       Text(
@@ -107,7 +107,7 @@ class AnnouncementContainer extends StatelessWidget {
                       Text(
                         item["desc"]!,
                         textAlign: TextAlign.center,
-                        style: MyTextStyle.f14(Colors.brown),
+                        style: MyTextStyle.f12(Colors.brown),
                         maxLines: 5,
                         overflow: TextOverflow.ellipsis,
                       ),

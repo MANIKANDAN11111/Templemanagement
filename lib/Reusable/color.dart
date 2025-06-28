@@ -37,6 +37,8 @@ const Color appPrimaryColor = Colors.pinkAccent;
 const Color SecondaryColor = Colors.pinkAccent;
 
 
+
+
 final Color textColorcontact =  blackColor;
 final Color secondaryTextColorcontact = greyColor;
 final Color cardBackgroundColorcontact = whiteColor;

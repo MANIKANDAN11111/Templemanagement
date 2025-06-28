@@ -52,14 +52,28 @@ class HomeScreenViewState extends State<HomeScreenView> {
       return Scaffold(
         appBar: AppBar(
           backgroundColor: appPrimaryColor,
-          title: Text(
-                'Temple Management System',
-                style:MyTextStyle.f20(
-                  whiteColor,
-                  weight: FontWeight.bold,
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              ColorFiltered(
+                colorFilter: const ColorFilter.mode(
+                  whiteColor, // Makes the icon white
+                  BlendMode.srcIn,
+                ),
+                child: Image.asset(
+                  'assets/image/sentinix_logo1.png',
+                  height: 40,
                 ),
               ),
+              const SizedBox(width: 5),
+              Text(
+                'Temple Management System',
+                style: MyTextStyle.f18(whiteColor, weight: FontWeight.bold),
+              ),
+            ],
           ),
+          centerTitle: true,
+        ),
         body: Padding(
           padding: const EdgeInsets.all(16),
           child: SingleChildScrollView(
@@ -71,7 +85,6 @@ class HomeScreenViewState extends State<HomeScreenView> {
                 ),
                 const SizedBox(height: 10),
                 AnnouncementScreen(),
-                const SizedBox(height:10),
                 ServicesSection(),
                 const SizedBox(height:30),
               ],
