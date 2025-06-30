@@ -3,9 +3,14 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:simple/Bloc/demo/demo_bloc.dart';
 import 'package:simple/Reusable/color.dart';
 import 'package:simple/Reusable/text_styles.dart';
+import 'package:simple/UI/ButtomNavigationBar/buttomnavigation.dart';
+
+const Color greyColor800 = Colors.grey;
+const Color greyColor = Colors.grey;
 
 class HallBookingScreen extends StatelessWidget {
   final DateTime selectedDate;
@@ -39,10 +44,9 @@ class _HallBookingScreenViewState extends State<HallBookingScreenView> {
   final TextEditingController paidAmountController = TextEditingController(text: '0');
   final TextEditingController balanceAmountController = TextEditingController(text: '0');
   final TextEditingController nameController = TextEditingController();
-  final TextEditingController phoneController = TextEditingController();
-
   final TextEditingController brideNameController = TextEditingController();
   final TextEditingController groomNameController = TextEditingController();
+
   File? brideDocument;
   File? groomDocument;
 
@@ -67,6 +71,9 @@ class _HallBookingScreenViewState extends State<HallBookingScreenView> {
     'Meenam': ['Pooratadhi', 'Uthiratadhi', 'Revati'],
   };
 
+  String _phoneNumber = '';
+  String _countryCode = '+91';
+
   @override
   void initState() {
     super.initState();
@@ -78,6 +85,12 @@ class _HallBookingScreenViewState extends State<HallBookingScreenView> {
   void dispose() {
     paidAmountController.removeListener(_updateBalanceAmount);
     totalAmountController.removeListener(_updateBalanceAmount);
+    nameController.dispose();
+    totalAmountController.dispose();
+    paidAmountController.dispose();
+    balanceAmountController.dispose();
+    brideNameController.dispose();
+    groomNameController.dispose();
     super.dispose();
   }
 
@@ -108,13 +121,17 @@ class _HallBookingScreenViewState extends State<HallBookingScreenView> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Hall Booking submitted for ${DateFormat('MMMM d, yyyy').format(widget.selectedDate)}',
+            'Hall Booking submitted for ${DateFormat('MMMM d, y').format(widget.selectedDate)}',
             style: MyTextStyle.f14(Colors.white),
           ),
           backgroundColor: Colors.green,
         ),
       );
-      Navigator.pop(context);
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (_) => const DashboardScreen()),
+            (route) => false,
+      );
     }
   }
 
@@ -148,12 +165,21 @@ class _HallBookingScreenViewState extends State<HallBookingScreenView> {
   Widget mainContainer() {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Hall Booking', style: MyTextStyle.f20(whiteColor, weight: FontWeight.bold)),
+        title: Text(
+          'Hall Booking',
+          style: MyTextStyle.f20(whiteColor, weight: FontWeight.bold),
+        ),
         backgroundColor: appPrimaryColor,
+        centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          color: whiteColor,
-          onPressed: () => Navigator.pop(context),
+          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 18),
+          onPressed: () {
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (_) => const DashboardScreen()),
+                  (route) => false,
+            );
+          },
         ),
       ),
       body: Form(
@@ -163,63 +189,119 @@ class _HallBookingScreenViewState extends State<HallBookingScreenView> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Booking Date: ${DateFormat('MMMM d, yyyy').format(widget.selectedDate)}',
-              style: MyTextStyle.f16(blackColor,weight: FontWeight.bold),),
-              const SizedBox(height: 12),
-              _buildTextField('Name', nameController),
-              _buildTextField('Phone', phoneController, keyboard: TextInputType.phone),
-              _buildTextField('Total Amount', totalAmountController, keyboard: TextInputType.number),
-              _buildTextField('Paid Amount', paidAmountController, keyboard: TextInputType.number),
-              _buildTextField('Balance Amount', balanceAmountController, keyboard: TextInputType.number, readOnly: true),
+              _buildSectionTitle('Booking Date'),
+              Text(DateFormat('MMMM d, y').format(widget.selectedDate),
+                  style: MyTextStyle.f16(appPrimaryColor)),
               const SizedBox(height: 16),
-              _buildDropdown('Slot', selectedSlot, ['Evening', 'Night'], (val) => setState(() => selectedSlot = val)),
+
+              _buildTextField('Name', nameController, hintText: 'Enter name'),
+              const SizedBox(height: 8),
+
+              _buildSectionTitle('Phone Number'),
+              const SizedBox(height: 4),
+              IntlPhoneField(
+                decoration: _inputDecoration(hintText: 'Phone Number', prefixIcon: Icons.phone),
+                initialCountryCode: 'IN',
+                onChanged: (phone) {
+                  setState(() {
+                    _countryCode = phone.countryCode;
+                    _phoneNumber = phone.number;
+                  });
+                },
+                validator: (phone) {
+                  if (phone == null || phone.number.isEmpty) {
+                    return 'Please enter your phone number';
+                  }
+                  if (phone.number.length < 7 || phone.number.length > 15) { // Common phone number length range
+                    return 'Phone number must be 7-15 digits';
+                  }
+                  return null;
+                },
+                cursorColor: appPrimaryColor,
+              ),
+              const SizedBox(height: 8),
+
+              _buildTextField('Total Amount', totalAmountController, keyboard: TextInputType.number, hintText: 'Enter total amount'),
+              _buildTextField('Paid Amount', paidAmountController, keyboard: TextInputType.number, hintText: 'Enter paid amount'),
+              _buildTextField('Balance Amount', balanceAmountController, keyboard: TextInputType.number, readOnly: true, hintText: 'Calculated balance'),
+              const SizedBox(height: 16),
+
+              _buildDropdown('Slot', selectedSlot, ['Evening', 'Night'], (val) => setState(() => selectedSlot = val), hintText: 'Select a slot'),
               _buildDropdown('Package', selectedPackage, ['Basic', 'Standard', 'Premium'], (val) {
                 setState(() {
                   selectedPackage = val;
                   totalAmountController.text = val == 'Basic' ? '100' : val == 'Standard' ? '200' : '300';
                   _updateBalanceAmount();
                 });
-              }),
-              _buildDropdown('Free Addons', selectedFreeAddon, ['Decoration', 'Chairs'], (val) => setState(() => selectedFreeAddon = val)),
-              _buildDropdown('Paid Addons', selectedPaidAddon, ['Music', 'AC'], (val) => setState(() => selectedPaidAddon = val)),
-
-
-              const SizedBox(height: 16),
-              _buildTextField('Bride Name', brideNameController),
-              _buildFileUpload('Bride Document', brideDocument, () => pickFile(true)),
-              _buildTextField('Groom Name', groomNameController),
-              _buildFileUpload('Groom Document', groomDocument, () => pickFile(false)),
+              }, hintText: 'Select a package'),
+              _buildDropdown('Free Addons', selectedFreeAddon, ['Decoration', 'Chairs'], (val) => setState(() => selectedFreeAddon = val), hintText: 'Select free addons'),
+              _buildDropdown('Paid Addons', selectedPaidAddon, ['Music', 'AC'], (val) => setState(() => selectedPaidAddon = val), hintText: 'Select paid addons'),
 
               const SizedBox(height: 16),
+              _buildSectionTitle('Couple Details'),
+              _buildTextField('Bride Name', brideNameController, hintText: 'Enter bride\'s name'),
+              _buildFileUpload('Bride Document', brideDocument, (val) => brideDocument = val, () => pickFile(true)),
+              _buildTextField('Groom Name', groomNameController, hintText: 'Enter groom\'s name'),
+              _buildFileUpload('Groom Document', groomDocument, (val) => groomDocument = val, () => pickFile(false)),
+
+              const SizedBox(height: 16),
+              _buildSectionTitle('Rasi & Star Details'),
               ...rasiStarFields.asMap().entries.map((entry) {
                 final index = entry.key;
                 final field = entry.value;
-                return Column(
-                  children: [
-                    _buildDropdown('Rasi', field['rasi'], rasiOptions, (val) {
-                      setState(() {
-                        field['rasi'] = val;
-                        field['star'] = null;
-                      });
-                    }),
-                    _buildDropdown('Star', field['star'], getStarOptions(field['rasi']), (val) {
-                      setState(() => field['star'] = val);
-                    }),
-                    if (rasiStarFields.length > 1)
-                      TextButton.icon(
-                        icon: Icon(Icons.remove, color: Colors.red),
-                        label: Text('Remove', style: MyTextStyle.f14(Colors.red)),
-                        onPressed: () => _removeRasiStarField(index),
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 16),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: appPrimaryColor.withOpacity(0.5)),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Column(
+                    children: [
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          rasiStarFields.length == 1 ? 'Rasi/Star' : (index == 0 ? 'Bride\'s Rasi/Star' : 'Groom\'s Rasi/Star'),
+                          style: MyTextStyle.f14(appPrimaryColor, weight: FontWeight.bold),
+                        ),
                       ),
-                  ],
+                      const SizedBox(height: 8),
+                      _buildDropdown('Rasi', field['rasi'], rasiOptions, (val) {
+                        setState(() {
+                          field['rasi'] = val;
+                          field['star'] = null;
+                        });
+                      }, hintText: 'Select Rasi'),
+                      _buildDropdown('Star', field['star'], getStarOptions(field['rasi']), (val) {
+                        setState(() => field['star'] = val);
+                      }, hintText: 'Select Star'),
+                      if (rasiStarFields.length > 1)
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: TextButton.icon(
+                            icon: const Icon(Icons.remove_circle_outline, color: Colors.red),
+                            label: Text('Remove', style: MyTextStyle.f14(Colors.red)),
+                            onPressed: () => _removeRasiStarField(index),
+                          ),
+                        ),
+                    ],
+                  ),
                 );
               }),
               if (rasiStarFields.length < 2)
-                ElevatedButton.icon(
-                  onPressed: _addRasiStarField,
-                  icon: Icon(Icons.add),
-                  label: Text('Add Rasi/Star'),
-                  style: ElevatedButton.styleFrom(backgroundColor: appPrimaryColor, foregroundColor: whiteColor),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: ElevatedButton.icon(
+                    onPressed: _addRasiStarField,
+                    icon: const Icon(Icons.add),
+                    label: const Text('Add Rasi/Star for Second Person'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: appPrimaryColor,
+                      foregroundColor: whiteColor,
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                  ),
                 ),
 
               const SizedBox(height: 24),
@@ -230,7 +312,8 @@ class _HallBookingScreenViewState extends State<HallBookingScreenView> {
                       onPressed: () => Navigator.pop(context),
                       style: OutlinedButton.styleFrom(
                         side: BorderSide(color: appPrimaryColor),
-                        padding: EdgeInsets.symmetric(vertical: 14),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                       child: Text('Cancel', style: MyTextStyle.f16(appPrimaryColor, weight: FontWeight.bold)),
                     ),
@@ -241,7 +324,9 @@ class _HallBookingScreenViewState extends State<HallBookingScreenView> {
                       onPressed: _submitForm,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: appPrimaryColor,
-                        padding: EdgeInsets.symmetric(vertical: 14),
+                        foregroundColor: whiteColor,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                       child: Text('Submit', style: MyTextStyle.f16(whiteColor, weight: FontWeight.bold)),
                     ),
@@ -255,52 +340,114 @@ class _HallBookingScreenViewState extends State<HallBookingScreenView> {
     );
   }
 
-  Widget _buildDropdown(String label, String? value, List<String> options, void Function(String?) onChanged) {
+  Widget _buildSectionTitle(String title) => Text(
+    title,
+    style: MyTextStyle.f16(appPrimaryColor, weight: FontWeight.bold),
+  );
+
+  Widget _buildDropdown(String label, String? value, List<String> options, void Function(String?) onChanged, {String? hintText}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
-      child: DropdownButtonFormField<String>(
-        decoration: InputDecoration(
-          labelText: label,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-        ),
-        value: value,
-        items: options.map((item) => DropdownMenuItem(value: item, child: Text(item))).toList(),
-        onChanged: onChanged,
-        validator: (val) => val == null ? 'Select $label' : null,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: MyTextStyle.f14(appPrimaryColor)),
+          const SizedBox(height: 4),
+          DropdownButtonFormField<String>(
+            value: value,
+            decoration: _inputDecoration(hintText: hintText ?? 'Select $label'),
+            validator: (val) => val == null ? 'Please select $label' : null,
+            items: options.map((item) => DropdownMenuItem(value: item, child: Text(item))).toList(),
+            onChanged: onChanged,
+            icon: Icon(Icons.arrow_drop_down, color: appPrimaryColor),
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildTextField(String label, TextEditingController controller,
-      {TextInputType keyboard = TextInputType.text, bool readOnly = false}) {
+      {TextInputType keyboard = TextInputType.text, bool readOnly = false, String? hintText, IconData? prefixIcon}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
-      child: TextFormField(
-        controller: controller,
-        keyboardType: keyboard,
-        readOnly: readOnly,
-        decoration: InputDecoration(
-          labelText: label,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-        ),
-        validator: (val) => val == null || val.isEmpty ? 'Enter $label' : null,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: MyTextStyle.f14(appPrimaryColor)),
+          const SizedBox(height: 4),
+          TextFormField(
+            controller: controller,
+            keyboardType: keyboard,
+            readOnly: readOnly,
+            decoration: _inputDecoration(hintText: hintText, prefixIcon: prefixIcon),
+            validator: (val) {
+              if (val == null || val.isEmpty) {
+                return 'Please enter $label';
+              }
+              if (keyboard == TextInputType.number && double.tryParse(val) == null) {
+                return 'Enter valid number';
+              }
+              return null;
+            },
+            cursorColor: appPrimaryColor,
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildFileUpload(String label, File? file, VoidCallback onTap) {
+  InputDecoration _inputDecoration({String? labelText, String? hintText, IconData? prefixIcon, Widget? suffixIcon}) => InputDecoration(
+    labelText: labelText,
+    labelStyle: labelText != null ? TextStyle(color: appPrimaryColor) : null,
+    hintText: hintText,
+    hintStyle: MyTextStyle.f14(greyColor),
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(8),
+      borderSide: BorderSide(color: appPrimaryColor),
+    ),
+    focusedBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(8),
+      borderSide: BorderSide(color: appPrimaryColor, width: 2),
+    ),
+    errorBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(8),
+      borderSide: const BorderSide(color: Colors.red),
+    ),
+    focusedErrorBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(8),
+      borderSide: const BorderSide(color: Colors.red, width: 2),
+    ),
+    prefixIcon: prefixIcon != null ? Icon(prefixIcon, color: appPrimaryColor) : null,
+    suffixIcon: suffixIcon,
+    contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+  );
+
+  Widget _buildFileUpload(String label, File? file, ValueChanged<File?> onFileSelected, VoidCallback onTap) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(child: Text(file != null ? file.path.split('/').last : 'No file chosen')),
-          ElevatedButton(
-            onPressed: onTap,
-            child: Text('Choose File'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: appPrimaryColor,
-              foregroundColor: Colors.white,
+          Text(label, style: MyTextStyle.f14(appPrimaryColor)),
+          const SizedBox(height: 4),
+          TextFormField(
+            readOnly: true,
+            controller: TextEditingController(text: file != null ? file.path.split('/').last : ''),
+            decoration: _inputDecoration(
+              hintText: 'No file chosen',
+              suffixIcon: IconButton(
+                icon: const Icon(Icons.attach_file, color: appPrimaryColor),
+                onPressed: onTap,
+              ),
             ),
+            onTap: onTap,
+            validator: (val) {
+              if (file == null) {
+                return 'Please upload $label';
+              }
+              return null;
+            },
+            cursorColor: appPrimaryColor,
           ),
         ],
       ),

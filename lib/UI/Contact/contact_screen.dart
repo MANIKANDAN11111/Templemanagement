@@ -45,9 +45,25 @@ class ContactScreenViewState extends State<ContactScreenView> {
             backgroundColor: whiteColor,
             appBar: AppBar(
               backgroundColor: appPrimaryColor,
-              title: Text(
-                'Temple Management System',
-                style: MyTextStyle.f20(whiteColor, weight: FontWeight.bold),
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  ColorFiltered(
+                    colorFilter: const ColorFilter.mode(
+                      whiteColor,
+                      BlendMode.srcIn,
+                    ),
+                    child: Image.asset(
+                      'assets/image/sentinix_logo1.png',
+                      height: 40,
+                    ),
+                  ),
+                  const SizedBox(width: 5),
+                  Text(
+                    'Temple Management System',
+                    style: MyTextStyle.f18(whiteColor, weight: FontWeight.bold),
+                  ),
+                ],
               ),
               centerTitle: true,
             ),
@@ -66,11 +82,12 @@ class ContactScreenViewState extends State<ContactScreenView> {
         children: [
           Text(
             'Get in Touch',
-            style: MyTextStyle.f32(appPrimaryColor),
-            textAlign: TextAlign.center,
+            style: MyTextStyle.f26(appPrimaryColor, weight: FontWeight.bold),
+            textAlign: TextAlign.start,
           ),
           const SizedBox(height: 40),
           contactCardsSection(),
+          const SizedBox(height: 40),
           followUsSection(),
         ],
       ),
@@ -79,9 +96,9 @@ class ContactScreenViewState extends State<ContactScreenView> {
 
   Widget contactCardsSection() {
     return Container(
-      padding: const EdgeInsets.all(24.0),
+      padding: const EdgeInsets.fromLTRB(15, 20, 15, 20),
       decoration: BoxDecoration(
-        color: mainCardBackgroundColor,
+        color: whiteColor,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -92,75 +109,73 @@ class ContactScreenViewState extends State<ContactScreenView> {
           ),
         ],
       ),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          if (constraints.maxWidth > 700) {
-            return Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Expanded(child: buildContactCard(icon: Icons.location_on, title: 'Address', content: '123 Temple Street, Chennai')),
-                const SizedBox(width: 20),
-                Expanded(child: buildContactCard(icon: Icons.phone, title: 'Phone', content: '+91 98765 43210')),
-                const SizedBox(width: 20),
-                Expanded(child: buildContactCard(icon: Icons.mail, title: 'Mail', content: 'info@temple.com')),
-              ],
-            );
-          } else {
-            return Column(
-              children: [
-                buildContactCard(icon: Icons.location_on, title: 'Address', content: '123 Temple Street, Chennai'),
-                const SizedBox(height: 20),
-                buildContactCard(icon: Icons.phone, title: 'Phone', content: '+91 98765 43210'),
-                const SizedBox(height: 20),
-                buildContactCard(icon: Icons.mail, title: 'Mail', content: 'info@temple.com'),
-              ],
-            );
-          }
-        },
+      child: Column(
+        children: [
+          _buildContactDetailRow(
+            icon: Icons.location_on,
+            title: 'Address',
+            content: '123 Temple Street\nChennai',
+            iconColor: appPrimaryColor,
+            contentStyle: MyTextStyle.f16(greyColor800, weight: FontWeight.bold),
+          ),
+          const Divider(color: greyColor, thickness: 1, height: 30),
+          _buildContactDetailRow(
+            icon: Icons.phone,
+            title: 'Phone',
+            content: '+91 9876543210',
+            iconColor: appPrimaryColor,
+            contentStyle: MyTextStyle.f16(greyColor),
+          ),
+          const Divider(color: greyColor, thickness: 1, height: 30),
+          _buildContactDetailRow(
+            icon: Icons.mail,
+            title: 'Mail',
+            content: 'Info@temple.com',
+            iconColor: appPrimaryColor,
+            contentStyle: MyTextStyle.f16(greyColor),
+          ),
+        ],
       ),
     );
   }
 
-  Widget buildContactCard({
+  Widget _buildContactDetailRow({
     required IconData icon,
     required String title,
     required String content,
+    required Color iconColor,
+    required TextStyle contentStyle,
   }) {
-    return Container(
-      height: 250,
-      width: 250,
-      padding: const EdgeInsets.all(24.0),
-      decoration: BoxDecoration(
-        color: cardBackgroundColorcontact,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: greyColor.withOpacity(0.1),
-            spreadRadius: 2,
-            blurRadius: 5,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
               color: iconColor.withOpacity(0.1),
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, color: iconColor, size: 40),
+            child: Icon(icon, color: iconColor, size: 28),
           ),
-          const SizedBox(height: 24),
-          Text(title, style: MyTextStyle.f20(textColorcontact), textAlign: TextAlign.center),
-          const SizedBox(height: 8),
-          Text(content,
-              style: MyTextStyle.f16(secondaryTextColorcontact),
-              textAlign: TextAlign.center,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis),
+          const SizedBox(width: 20),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: MyTextStyle.f20(blackColor, weight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  content,
+                  style: MyTextStyle.f16(greyColor),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -177,19 +192,22 @@ class ContactScreenViewState extends State<ContactScreenView> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 40),
-        Text("Follow us", style: MyTextStyle.f20(appPrimaryColor, weight: FontWeight.bold)),
+        Text(
+          "Follow us",
+          style: MyTextStyle.f20(appPrimaryColor, weight: FontWeight.bold),
+        ),
         const SizedBox(height: 16),
         Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(13),
           decoration: BoxDecoration(
-            color: mainCardBackgroundColor,
-            borderRadius: BorderRadius.circular(16),
+            color: whiteColor, // White background
+            borderRadius: BorderRadius.circular(16), // Rounded corners
             boxShadow: [
               BoxShadow(
-                color: greyColor.withOpacity(0.1),
-                blurRadius: 5,
-                offset: const Offset(0, 3),
+                color: greyColor.withOpacity(0.2),
+                spreadRadius: 3,
+                blurRadius: 7,
+                offset: const Offset(0, 5),
               ),
             ],
           ),

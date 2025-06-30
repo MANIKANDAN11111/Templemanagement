@@ -95,8 +95,6 @@ class _SignUpPageViewState extends State<SignUpPageView> {
                   Text('Fill in your details to get started',
                       style: MyTextStyle.f14(greyColor, weight: FontWeight.bold)),
                   const SizedBox(height: 32),
-
-                  // Full Name
                   TextFormField(
                     controller: _fullNameController,
                     decoration: _inputDecoration('Full Name', Icons.person),
@@ -104,8 +102,6 @@ class _SignUpPageViewState extends State<SignUpPageView> {
                     value == null || value.isEmpty ? 'Please enter your full name' : null,
                   ),
                   const SizedBox(height: 16),
-
-                  // Username
                   TextFormField(
                     controller: _usernameController,
                     decoration: _inputDecoration('Username', Icons.person_outline),
@@ -116,8 +112,6 @@ class _SignUpPageViewState extends State<SignUpPageView> {
                     },
                   ),
                   const SizedBox(height: 16),
-
-                  // Email
                   TextFormField(
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
@@ -153,8 +147,6 @@ class _SignUpPageViewState extends State<SignUpPageView> {
                     },
                   ),
                   const SizedBox(height: 16),
-
-                  // Confirm Password
                   TextFormField(
                     controller: _confirmPasswordController,
                     obscureText: _obscureConfirmPassword,
@@ -175,7 +167,6 @@ class _SignUpPageViewState extends State<SignUpPageView> {
                     },
                   ),
                   const SizedBox(height: 16),
-
                   // Phone Field
                   IntlPhoneField(
                     decoration: _inputDecoration('Phone Number', Icons.phone),
